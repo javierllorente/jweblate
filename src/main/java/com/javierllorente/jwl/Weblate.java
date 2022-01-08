@@ -90,7 +90,7 @@ public class Weblate {
     
     private void get(String resource, String path, int page, List<String> elements) 
             throws URISyntaxException, IOException, InterruptedException {
-        String response = http.get(new URI(getApiUrl() + resource + "?page=" + page));
+        String response = http.get(resource, page);
 
         JsonObject jsonObject;
         try (JsonReader jsonReader = Json.createReader(new StringReader(response))) {
@@ -135,7 +135,7 @@ public class Weblate {
             throws URISyntaxException, IOException, InterruptedException {
         String resource = "translations/" + project + "/" + component
                 + "/" + language + "/";
-        String response = http.get(new URI(getApiUrl() + resource));
+        String response = http.get(resource);
 
         JsonObject jsonObject;
         try (JsonReader jsonReader = Json.createReader(new StringReader(response))) {
@@ -150,7 +150,7 @@ public class Weblate {
             throws URISyntaxException, IOException, InterruptedException {
         String resource = "translations/" + project + "/" + component
                 + "/" + language + "/file/";
-        String response = http.get(new URI(getApiUrl() + resource));
+        String response = http.get(resource);
         return response;
     }
 
@@ -158,7 +158,7 @@ public class Weblate {
             throws URISyntaxException, IOException, InterruptedException {
         String resource = "translations/" + project + "/" + component
                 + "/" + language + "/file/";
-        String response = http.post(new URI(getApiUrl() + resource), file);
+        String response = http.post(resource, file);
         logger.log(Level.INFO, "Response: {0}", response);
         
         JsonObject jsonObject;

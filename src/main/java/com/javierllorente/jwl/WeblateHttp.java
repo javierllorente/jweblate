@@ -16,24 +16,25 @@
  */
 package com.javierllorente.jwl;
 
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.net.http.HttpClient;
-import java.net.http.HttpHeaders;
-import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.BodyPublisher;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import javax.naming.AuthenticationException;
-import javax.net.ssl.HttpsURLConnection;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.logging.LoggingFeature;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.glassfish.jersey.media.multipart.MultiPart;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 /**
  *
@@ -42,32 +43,37 @@ import javax.net.ssl.HttpsURLConnection;
 public class WeblateHttp {
 
     private static final Logger logger = Logger.getLogger(WeblateHttp.class.getName());
-    private HttpClient client;
+    private Client client;
+    private WebTarget target;
     private String username;
     private String password;
     private String authToken;
-    private URI apiURI;
     boolean authenticated;
 
     public WeblateHttp() {
         authenticated = false;
-        client = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(20))
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .build();
+        ClientConfig config = new ClientConfig();
+        config.property(ClientProperties.CONNECT_TIMEOUT, 20000);
+        config.property(ClientProperties.FOLLOW_REDIRECTS, true);
+        client = ClientBuilder.newClient(config)
+                .register(new LoggingFeature(logger,
+                        Level.INFO,
+                        LoggingFeature.Verbosity.HEADERS_ONLY,
+                        8192))
+                .register(MultiPartFeature.class);
     }
 
     public WeblateHttp(URI apiURI) {
         this();
-        this.apiURI = apiURI;
+        target = client.target(apiURI);
     }    
 
     public URI getApiURI() {
-        return apiURI;
+        return target.getUri();
     }
 
     public void setApiURI(URI apiURI) {
-        this.apiURI = apiURI;
+        target = client.target(apiURI);
     }
 
     public String getUsername() {
@@ -102,83 +108,80 @@ public class WeblateHttp {
         this.authenticated = authenticated;
     } 
     
-    public void authenticate() throws AuthenticationException, IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
+    public void authenticate() throws AuthenticationException, IOException {
+        try (Response response = target.request()
                 .header("User-Agent", UserAgent.FULL)
                 .header("Authorization", authToken)
-                .GET().uri(apiURI)
-                .build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        authenticated = (response.statusCode() == HttpsURLConnection.HTTP_OK);
-        if (!authenticated) {
-            throw new AuthenticationException(Integer.toString(response.statusCode()));
+                .accept(MediaType.APPLICATION_JSON)
+                .get()) {
+            logger.info(getConnectionInfo(target.getUri(), "", response.getStatus()));
+            
+            authenticated = (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL);
+            if (!authenticated) {
+                throw new AuthenticationException(Integer.toString(response.getStatus()));
+            }
         }
-        logger.info(getConnectionInfo(response));
     }
     
-    public String get(URI uri) throws IOException, InterruptedException {       
-        HttpRequest request = HttpRequest.newBuilder()
+    public String get(String resource, int page) throws IOException {
+        Response response = target
+                .path(resource)
+                .queryParam("page", page)
+                .request()
                 .header("User-Agent", UserAgent.FULL)
                 .header("Authorization", authToken)
-                .GET().uri(uri)
-                .build();        
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        logger.info(getConnectionInfo(response));
-        if (response.statusCode() != HttpsURLConnection.HTTP_OK) {
-            throw new IOException(Integer.toString(response.statusCode()));
+                .accept(MediaType.APPLICATION_JSON)
+                .get();
+        logger.info(getConnectionInfo(target.getUri(), resource + "?page=" + page, response.getStatus()));
+        
+        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+            throw new IOException(Integer.toString(response.getStatus()));
+        }        
+        response.bufferEntity();
+        return response.readEntity(String.class);
+    }
+    
+    public String get(String resource) throws IOException {
+        Response response = target
+                .path(resource)
+                .request()
+                .header("User-Agent", UserAgent.FULL)
+                .header("Authorization", authToken)
+                .accept(MediaType.APPLICATION_JSON)
+                .get();
+        logger.info(getConnectionInfo(target.getUri(), resource, response.getStatus()));
+        
+        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+            throw new IOException(Integer.toString(response.getStatus()));
         }
-        return response.body();
+        response.bufferEntity();
+        return response.readEntity(String.class);        
+    }
+    
+    public String post(String resource, String strings) throws IOException {        
+        FormDataContentDisposition fdcd = FormDataContentDisposition.name("file")
+                .fileName("strings.po").build();
+
+        MultiPart multiPartEntity = new FormDataMultiPart()
+                .field("method", "translate")
+                .field("conflicts", "replace-translated")
+                .bodyPart(new FormDataBodyPart(fdcd, strings.getBytes(), MediaType.TEXT_PLAIN_TYPE));
+
+        Response response = target
+                .path(resource)
+                .request()
+                .header("User-Agent", UserAgent.FULL)
+                .header("Authorization", authToken)
+                .accept(MediaType.APPLICATION_JSON)
+                .post(Entity.entity(multiPartEntity, multiPartEntity.getMediaType()));
+        logger.info(getConnectionInfo(target.getUri(), resource, response.getStatus()));
+                
+        response.bufferEntity();
+        return response.readEntity(String.class);
     } 
     
-    public String post(URI uri, String strings) throws IOException, InterruptedException {
-        String boundary = UserAgent.NAME + System.currentTimeMillis();
-        Map<String, String> formParams = new LinkedHashMap<>();
-        formParams.put("method", "translate");
-        formParams.put("conflicts", "replace-translated");
-        
-        HttpRequest request = HttpRequest.newBuilder()
-                .header("User-Agent", UserAgent.FULL)
-                .header("Authorization", authToken)
-                .header("Content-Type", "multipart/form-data; boundary=" + boundary)
-                .POST(ofMimeMultipartData(formParams, strings, boundary))
-                .uri(uri)
-                .build();
-
-        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-        logger.info(getConnectionInfo(response));
-
-        return response.body();
+    private String getConnectionInfo(URI uri, String resource, int status) {
+        return "URL: " + uri + resource + ", status: " + status;
     }
     
-    private BodyPublisher ofMimeMultipartData(Map<String, String> formParams, 
-            String strings, String boundary) throws IOException {        
-        List<byte[]> byteArrays = new ArrayList<>();
-        byte[] separator = ("--" + boundary + "\r\n" + "Content-Disposition: form-data; name=")
-                .getBytes(StandardCharsets.UTF_8);
-        
-        byteArrays.add(separator);
-        byteArrays.add(("\"" + "file" + "\"; filename=\"" + "strings.po" + "\"\r\n" 
-                + "Content-Type: " + "text/x-gettext-translation" + "\r\n\r\n")
-                .getBytes(StandardCharsets.UTF_8));
-        byteArrays.add(strings.getBytes(StandardCharsets.UTF_8));
-        byteArrays.add(("\r\n").getBytes(StandardCharsets.UTF_8));
-        
-        formParams.entrySet().forEach(entry -> {
-            byteArrays.add(separator);
-            byteArrays.add(("\"" + entry.getKey() + "\"\r\n\r\n" + entry.getValue() + "\r\n")
-                    .getBytes(StandardCharsets.UTF_8));
-        });
-        
-        byteArrays.add(("--" + boundary + "--").getBytes(StandardCharsets.UTF_8));
-        
-        return BodyPublishers.ofByteArrays(byteArrays);
-    }
-
-    private String getConnectionInfo(HttpResponse<String> response) throws IOException {
-        HttpHeaders headers = response.headers();
-        headers.map().forEach((k, v) -> System.out.println(k + ":" + v));
-        return "URL: " + response.uri() + 
-                ", method: " + response.request().method() + 
-                ", response: " + response.statusCode();
-    }    
 }
