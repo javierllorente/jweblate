@@ -16,6 +16,7 @@
  */
 package com.javierllorente.jwl;
 
+import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -123,7 +124,7 @@ public class WeblateHttp {
         }
     }
     
-    public String get(String resource, int page) throws IOException {
+    public JsonObject get(String resource, int page) throws IOException {
         Response response = target
                 .path(resource)
                 .queryParam("page", page)
@@ -138,27 +139,44 @@ public class WeblateHttp {
             throw new IOException(Integer.toString(response.getStatus()));
         }        
         response.bufferEntity();
-        return response.readEntity(String.class);
+        return response.readEntity(JsonObject.class);
     }
     
-    public String get(String resource) throws IOException {
+    public JsonObject get(String resource) throws IOException {
         Response response = target
                 .path(resource)
                 .request()
                 .header("User-Agent", UserAgent.FULL)
                 .header("Authorization", authToken)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get();
         logger.info(getConnectionInfo(target.getUri(), resource, response.getStatus()));
         
         if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
             throw new IOException(Integer.toString(response.getStatus()));
         }
-        response.bufferEntity();
-        return response.readEntity(String.class);        
+        response.bufferEntity();        
+        return response.readEntity(JsonObject.class);        
     }
     
-    public String post(String resource, String strings) throws IOException {        
+    public String getText(String resource) throws IOException {
+        Response response = target
+                .path(resource)
+                .request()
+                .header("User-Agent", UserAgent.FULL)
+                .header("Authorization", authToken)
+                .accept(MediaType.TEXT_PLAIN_TYPE)
+                .get();
+        logger.info(getConnectionInfo(target.getUri(), resource, response.getStatus()));
+        
+        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+            throw new IOException(Integer.toString(response.getStatus()));
+        }
+        response.bufferEntity();        
+        return response.readEntity(String.class);        
+    }
+       
+    public JsonObject post(String resource, String strings) throws IOException {        
         FormDataContentDisposition fdcd = FormDataContentDisposition.name("file")
                 .fileName("strings.po").build();
 
@@ -177,7 +195,7 @@ public class WeblateHttp {
         logger.info(getConnectionInfo(target.getUri(), resource, response.getStatus()));
                 
         response.bufferEntity();
-        return response.readEntity(String.class);
+        return response.readEntity(JsonObject.class);
     } 
     
     private String getConnectionInfo(URI uri, String resource, int status) {

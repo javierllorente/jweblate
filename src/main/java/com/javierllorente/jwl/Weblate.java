@@ -16,13 +16,10 @@
  */
 package com.javierllorente.jwl;
 
-import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
 import jakarta.json.JsonValue;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -90,12 +87,7 @@ public class Weblate {
     
     private void get(String resource, String path, int page, List<String> elements) 
             throws URISyntaxException, IOException, InterruptedException {
-        String response = http.get(resource, page);
-
-        JsonObject jsonObject;
-        try (JsonReader jsonReader = Json.createReader(new StringReader(response))) {
-            jsonObject = jsonReader.readObject();
-        }
+        JsonObject jsonObject = http.get(resource, page);
         
         JsonArray results = jsonObject.getJsonArray("results");        
         for (JsonValue value : results) {
@@ -135,39 +127,28 @@ public class Weblate {
             throws URISyntaxException, IOException, InterruptedException {
         String resource = "translations/" + project + "/" + component
                 + "/" + language + "/";
-        String response = http.get(resource);
-
-        JsonObject jsonObject;
-        try (JsonReader jsonReader = Json.createReader(new StringReader(response))) {
-            jsonObject = jsonReader.readObject();
-        }
+        JsonObject jsonObject = http.get(resource);
         
         JsonObject componentObject = jsonObject.getJsonObject("component");
-        return componentObject.getString("file_format");        
+        return componentObject.getString("file_format");
     }
 
     public String getFile(String project, String component, String language)
             throws URISyntaxException, IOException, InterruptedException {
         String resource = "translations/" + project + "/" + component
                 + "/" + language + "/file/";
-        String response = http.get(resource);
-        return response;
+        return http.getText(resource);
     }
 
     public Map<String, String> submit(String project, String component, String language, String file)
             throws URISyntaxException, IOException, InterruptedException {
         String resource = "translations/" + project + "/" + component
                 + "/" + language + "/file/";
-        String response = http.post(resource, file);
-        logger.log(Level.INFO, "Response: {0}", response);
-        
-        JsonObject jsonObject;
-        try (JsonReader jsonReader = Json.createReader(new StringReader(response))) {
-            jsonObject = jsonReader.readObject();
-        }
+        JsonObject jsonObject = http.post(resource, file);
+        logger.log(Level.INFO, "Response: {0}", jsonObject);
         
         if (!jsonObject.containsKey("result") || jsonObject.isNull("result")) {
-            throw new IOException(response);
+            throw new IOException("JsonObject does not contain 'result' key/key is null");
         }
 
         Map<String, String> result = new HashMap<>();
