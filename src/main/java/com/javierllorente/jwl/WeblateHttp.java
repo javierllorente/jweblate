@@ -119,7 +119,7 @@ public class WeblateHttp {
             logger.info(getConnectionInfo(target.getUri(), "", response.getStatus()));            
             authenticated = (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL);
 
-            if (response.getStatusInfo() == Response.Status.UNAUTHORIZED) {
+            if (response.getStatusInfo().toEnum() == Response.Status.UNAUTHORIZED) {
                 throw new AuthenticationException(Integer.toString(response.getStatus()));
             }
         }
