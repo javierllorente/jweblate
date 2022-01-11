@@ -116,10 +116,10 @@ public class WeblateHttp {
                 .header("Authorization", authToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .get()) {
-            logger.info(getConnectionInfo(target.getUri(), "", response.getStatus()));
-            
+            logger.info(getConnectionInfo(target.getUri(), "", response.getStatus()));            
             authenticated = (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL);
-            if (!authenticated) {
+
+            if (response.getStatusInfo() == Response.Status.UNAUTHORIZED) {
                 throw new AuthenticationException(Integer.toString(response.getStatus()));
             }
         }
