@@ -17,6 +17,7 @@
 package com.javierllorente.jwl;
 
 import jakarta.json.JsonObject;
+import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -28,7 +29,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.naming.AuthenticationException;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.logging.LoggingFeature;
@@ -110,7 +110,7 @@ public class WeblateHttp {
         this.authenticated = authenticated;
     } 
     
-    public void authenticate() throws AuthenticationException, ProcessingException {
+    public void authenticate() throws NotAuthorizedException, ProcessingException {
         try (Response response = target.request()
                 .header("User-Agent", UserAgent.FULL)
                 .header("Authorization", authToken)
@@ -120,7 +120,7 @@ public class WeblateHttp {
             authenticated = (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL);
 
             if (response.getStatusInfo().toEnum() == Response.Status.UNAUTHORIZED) {
-                throw new AuthenticationException(Integer.toString(response.getStatus()));
+                throw new NotAuthorizedException(response.getStatus());
             }
         }
     }

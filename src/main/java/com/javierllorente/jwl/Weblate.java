@@ -19,6 +19,7 @@ package com.javierllorente.jwl;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
+import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.ProcessingException;
 import java.io.IOException;
 import java.net.URI;
@@ -30,7 +31,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.naming.AuthenticationException;
 
 /**
  *
@@ -82,7 +82,7 @@ public class Weblate {
     }
 
     public void authenticate()
-            throws AuthenticationException, ProcessingException {
+            throws NotAuthorizedException, ProcessingException {
         http.authenticate();
     }
     

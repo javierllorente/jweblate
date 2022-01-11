@@ -1,5 +1,4 @@
 module com.javierllorente.jwl {
-    requires java.naming;
     requires java.base;
     requires java.logging;
     requires jakarta.ws.rs;
