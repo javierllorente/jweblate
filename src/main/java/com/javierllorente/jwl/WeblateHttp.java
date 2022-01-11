@@ -17,6 +17,7 @@
 package com.javierllorente.jwl;
 
 import jakarta.json.JsonObject;
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -109,7 +110,7 @@ public class WeblateHttp {
         this.authenticated = authenticated;
     } 
     
-    public void authenticate() throws AuthenticationException, IOException {
+    public void authenticate() throws AuthenticationException, ProcessingException {
         try (Response response = target.request()
                 .header("User-Agent", UserAgent.FULL)
                 .header("Authorization", authToken)

@@ -19,6 +19,7 @@ package com.javierllorente.jwl;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
+import jakarta.ws.rs.ProcessingException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -81,7 +82,7 @@ public class Weblate {
     }
 
     public void authenticate()
-            throws AuthenticationException, IOException, InterruptedException {
+            throws AuthenticationException, ProcessingException {
         http.authenticate();
     }
     
