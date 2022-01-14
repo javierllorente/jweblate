@@ -81,10 +81,15 @@ public class Weblate {
     public boolean isAuthenticated() {
         return http.isAuthenticated();
     }
-
+    
     public void authenticate()
             throws ClientErrorException, ServerErrorException, ProcessingException {
         http.authenticate();
+    }
+    
+    public void logout() {
+        http.setAuthToken("");
+        http.setAuthenticated(false);
     }
     
     private void get(String resource, String path, int page, List<String> elements) 
