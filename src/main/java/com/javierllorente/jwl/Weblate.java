@@ -24,7 +24,6 @@ import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.ServerErrorException;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,7 +76,7 @@ public class Weblate {
     }
     
     private void get(String resource, String path, int page, List<String> elements) 
-            throws URISyntaxException, IOException, InterruptedException {
+            throws IOException {
         JsonObject jsonObject = http.get(resource, page);
         
         JsonArray results = jsonObject.getJsonArray("results");        
@@ -92,30 +91,30 @@ public class Weblate {
     }
     
     private List<String> getElements(String resource, String path) 
-            throws URISyntaxException, IOException, InterruptedException {
+            throws IOException {
         List<String> elements = new ArrayList<>();
         get(resource, path, 1, elements);
         return elements;
     }
 
     public List<String> getProjects() 
-            throws URISyntaxException, IOException, InterruptedException {
+            throws IOException {
         return getElements("projects/", "slug");
     }
 
     public List<String> getComponents(String project) 
-            throws URISyntaxException, IOException, InterruptedException {
+            throws IOException {
         return getElements("projects/" + project + "/components/", "slug");
     }
 
     public List<String> getTranslations(String project, String component)
-            throws URISyntaxException, IOException, InterruptedException {
+            throws IOException {
         return getElements("components/" + project + "/" + component + "/translations/", 
                 "language_code");
     }
     
     public String getFileFormat(String project, String component, String language)
-            throws URISyntaxException, IOException, InterruptedException {
+            throws IOException {
         String resource = "translations/" + project + "/" + component
                 + "/" + language + "/";
         JsonObject jsonObject = http.get(resource);
@@ -125,14 +124,14 @@ public class Weblate {
     }
 
     public String getFile(String project, String component, String language)
-            throws URISyntaxException, IOException, InterruptedException {
+            throws IOException {
         String resource = "translations/" + project + "/" + component
                 + "/" + language + "/file/";
         return http.getText(resource);
     }
 
     public Map<String, String> submit(String project, String component, String language, String file)
-            throws URISyntaxException, IOException, InterruptedException {
+            throws IOException {
         String resource = "translations/" + project + "/" + component
                 + "/" + language + "/file/";
         JsonObject jsonObject = http.post(resource, file);
