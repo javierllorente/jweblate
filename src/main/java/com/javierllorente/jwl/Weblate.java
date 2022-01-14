@@ -19,8 +19,9 @@ package com.javierllorente.jwl;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
-import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.ServerErrorException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -82,7 +83,7 @@ public class Weblate {
     }
 
     public void authenticate()
-            throws NotAuthorizedException, ProcessingException {
+            throws ClientErrorException, ServerErrorException, ProcessingException {
         http.authenticate();
     }
     

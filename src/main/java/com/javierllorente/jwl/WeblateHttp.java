@@ -17,8 +17,9 @@
 package com.javierllorente.jwl;
 
 import jakarta.json.JsonObject;
-import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.ServerErrorException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -110,7 +111,9 @@ public class WeblateHttp {
         this.authenticated = authenticated;
     } 
     
-    public void authenticate() throws NotAuthorizedException, ProcessingException {
+    public void authenticate() 
+            throws ClientErrorException, ServerErrorException, ProcessingException {
+        
         try (Response response = target.request()
                 .header("User-Agent", UserAgent.FULL)
                 .header("Authorization", authToken)
@@ -118,10 +121,13 @@ public class WeblateHttp {
                 .get()) {
             logger.info(getConnectionInfo(target.getUri(), "", response.getStatus()));            
             authenticated = (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL);
-
-            if (response.getStatusInfo().toEnum() == Response.Status.UNAUTHORIZED) {
-                throw new NotAuthorizedException(response.getStatus());
-            }
+            
+            switch (response.getStatusInfo().getFamily()) {
+                case CLIENT_ERROR:
+                    throw new ClientErrorException(response);
+                case SERVER_ERROR:
+                    throw new ServerErrorException(response);
+            }                        
         }
     }
     
