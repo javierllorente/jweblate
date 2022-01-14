@@ -22,7 +22,6 @@ import jakarta.json.JsonValue;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.ServerErrorException;
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,7 +75,7 @@ public class Weblate {
     }
     
     private void get(String resource, String path, int page, List<String> elements) 
-            throws IOException {
+            throws ClientErrorException, ServerErrorException, ProcessingException {
         JsonObject jsonObject = http.get(resource, page);
         
         JsonArray results = jsonObject.getJsonArray("results");        
@@ -91,30 +90,30 @@ public class Weblate {
     }
     
     private List<String> getElements(String resource, String path) 
-            throws IOException {
+            throws ClientErrorException, ServerErrorException, ProcessingException {
         List<String> elements = new ArrayList<>();
         get(resource, path, 1, elements);
         return elements;
     }
 
     public List<String> getProjects() 
-            throws IOException {
+            throws ClientErrorException, ServerErrorException, ProcessingException {
         return getElements("projects/", "slug");
     }
 
     public List<String> getComponents(String project) 
-            throws IOException {
+            throws ClientErrorException, ServerErrorException, ProcessingException {
         return getElements("projects/" + project + "/components/", "slug");
     }
 
     public List<String> getTranslations(String project, String component)
-            throws IOException {
+            throws ClientErrorException, ServerErrorException, ProcessingException {
         return getElements("components/" + project + "/" + component + "/translations/", 
                 "language_code");
     }
     
     public String getFileFormat(String project, String component, String language)
-            throws IOException {
+            throws ClientErrorException, ServerErrorException, ProcessingException {
         String resource = "translations/" + project + "/" + component
                 + "/" + language + "/";
         JsonObject jsonObject = http.get(resource);
@@ -124,21 +123,21 @@ public class Weblate {
     }
 
     public String getFile(String project, String component, String language)
-            throws IOException {
+            throws ClientErrorException, ServerErrorException, ProcessingException {
         String resource = "translations/" + project + "/" + component
                 + "/" + language + "/file/";
         return http.getText(resource);
     }
 
     public Map<String, String> submit(String project, String component, String language, String file)
-            throws IOException {
+            throws ClientErrorException, ServerErrorException, ProcessingException {
         String resource = "translations/" + project + "/" + component
                 + "/" + language + "/file/";
         JsonObject jsonObject = http.post(resource, file);
         logger.log(Level.INFO, "Response: {0}", jsonObject);
         
         if (!jsonObject.containsKey("result") || jsonObject.isNull("result")) {
-            throw new IOException("JsonObject does not contain 'result' key/key is null");
+            throw new ProcessingException("JsonObject does not contain 'result' key/key is null");
         }
 
         Map<String, String> result = new HashMap<>();

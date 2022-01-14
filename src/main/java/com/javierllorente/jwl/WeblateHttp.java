@@ -26,7 +26,6 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -91,11 +90,20 @@ public class WeblateHttp {
 
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
-    } 
+    }
+    
+    private void handleErrors(final Response response) 
+            throws ServerErrorException, ClientErrorException {        
+        switch (response.getStatusInfo().getFamily()) {
+            case CLIENT_ERROR:
+                throw new ClientErrorException(response);
+            case SERVER_ERROR:
+                throw new ServerErrorException(response);
+        }
+    }
     
     public void authenticate() 
-            throws ClientErrorException, ServerErrorException, ProcessingException {
-        
+            throws ClientErrorException, ServerErrorException, ProcessingException {        
         try (Response response = target.request()
                 .header("User-Agent", UserAgent.FULL)
                 .header("Authorization", authToken)
@@ -104,16 +112,12 @@ public class WeblateHttp {
             logger.info(getConnectionInfo(target.getUri(), "", response.getStatus()));            
             authenticated = (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL);
             
-            switch (response.getStatusInfo().getFamily()) {
-                case CLIENT_ERROR:
-                    throw new ClientErrorException(response);
-                case SERVER_ERROR:
-                    throw new ServerErrorException(response);
-            }                        
+            handleErrors(response);
         }
     }
     
-    public JsonObject get(String resource, int page) throws IOException {
+    public JsonObject get(String resource, int page)
+            throws ClientErrorException, ServerErrorException, ProcessingException {        
         Response response = target
                 .path(resource)
                 .queryParam("page", page)
@@ -122,16 +126,15 @@ public class WeblateHttp {
                 .header("Authorization", authToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .get();
-        logger.info(getConnectionInfo(target.getUri(), resource + "?page=" + page, response.getStatus()));
+        logger.info(getConnectionInfo(target.getUri(), resource + "?page=" + page, response.getStatus()));        
+        handleErrors(response);
         
-        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-            throw new IOException(Integer.toString(response.getStatus()));
-        }        
         response.bufferEntity();
         return response.readEntity(JsonObject.class);
     }
     
-    public JsonObject get(String resource) throws IOException {
+    public JsonObject get(String resource)
+            throws ClientErrorException, ServerErrorException, ProcessingException {
         Response response = target
                 .path(resource)
                 .request()
@@ -140,15 +143,14 @@ public class WeblateHttp {
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get();
         logger.info(getConnectionInfo(target.getUri(), resource, response.getStatus()));
+        handleErrors(response);
         
-        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-            throw new IOException(Integer.toString(response.getStatus()));
-        }
         response.bufferEntity();        
         return response.readEntity(JsonObject.class);        
     }
     
-    public String getText(String resource) throws IOException {
+    public String getText(String resource) 
+            throws ClientErrorException, ServerErrorException, ProcessingException {
         Response response = target
                 .path(resource)
                 .request()
@@ -157,15 +159,14 @@ public class WeblateHttp {
                 .accept(MediaType.TEXT_PLAIN_TYPE)
                 .get();
         logger.info(getConnectionInfo(target.getUri(), resource, response.getStatus()));
+        handleErrors(response);
         
-        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-            throw new IOException(Integer.toString(response.getStatus()));
-        }
         response.bufferEntity();        
         return response.readEntity(String.class);        
     }
        
-    public JsonObject post(String resource, String strings) throws IOException {        
+    public JsonObject post(String resource, String strings) 
+            throws ClientErrorException, ServerErrorException, ProcessingException {
         FormDataContentDisposition fdcd = FormDataContentDisposition.name("file")
                 .fileName("strings.po").build();
 
@@ -182,6 +183,7 @@ public class WeblateHttp {
                 .accept(MediaType.APPLICATION_JSON)
                 .post(Entity.entity(multiPartEntity, multiPartEntity.getMediaType()));
         logger.info(getConnectionInfo(target.getUri(), resource, response.getStatus()));
+        handleErrors(response);
                 
         response.bufferEntity();
         return response.readEntity(JsonObject.class);
