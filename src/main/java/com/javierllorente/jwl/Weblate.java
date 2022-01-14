@@ -62,22 +62,6 @@ public class Weblate {
        http.setAuthToken(authToken);
    }
 
-    public String getUsername() {
-        return http.getUsername();
-    }
-
-    public void setUsername(String username) {
-        http.setUsername(username);
-    }
-
-    public String getPassword() {
-        return http.getPassword();
-    }
-
-    public void setPassword(String password) {
-        http.setPassword(password);
-    }
-
     public boolean isAuthenticated() {
         return http.isAuthenticated();
     }
