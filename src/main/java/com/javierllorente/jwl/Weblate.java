@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  *
  * @author javier
  */
-public class Weblate {
+public class Weblate implements TranslationProvider {
 
     private static final Logger logger = Logger.getLogger(Weblate.class.getName());
     private final WeblateHttp http;
