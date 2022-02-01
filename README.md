@@ -3,17 +3,17 @@ A Java-based Weblate library
 
 ### Consume Weblate's REST resources easily
 - Authenticate  
-`Weblate weblate = new Weblate();`  
-`weblate.setApiUrl(new URI("https://l10.example.org/api/"));`  
-`weblate.setAuthToken("yourToken");`  
-`weblate.authenticate();`  
+`TranslationProvider translationProvider = new Weblate();`  
+`translationProvider.setApiUrl(new URI("https://l10.example.org/api/"));`  
+`translationProvider.setAuthToken("yourToken");`  
+`translationProvider.authenticate();`  
 - Get resources  
-`List<String> projects = weblate.getProjects();`  
-`List<String> components = weblate.getComponents("project");`  
-`List<String> translations = weblate.getTranslations("project", "component");`  
+`List<String> projects = translationProvider.getProjects();`  
+`List<String> components = translationProvider.getComponents("project");`  
+`List<String> translations = translationProvider.getTranslations("project", "component");`  
 - Get translation file  
-`String file = weblate.getFile("project", "component", "language");`  
+`String file = translationProvider.getFile("project", "component", "language");`  
 - Submit changes  
-`Map<String, String> results = weblate.submit("project", "component", "language", "file");`  
+`Map<String, String> results = translationProvider.submit("project", "component", "language", "file");`  
 
 Copyright (C) 2020-2022 Javier Llorente javier@opensuse.org
