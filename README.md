@@ -16,4 +16,17 @@ A Java-based Weblate library
 - Submit changes  
 `Map<String, String> results = translationProvider.submit("project", "component", "language", "file");`  
 
+### Dependencies
+- jakarta.ws.rs-api
+- jersey-common
+- jersey-hk2
+- jakarta.activation-api
+- jersey-client
+- jakarta.json-api
+- jakarta.json
+- jersey-media-multipart
+- jersey-media-json-processing
+
+
+
 Copyright (C) 2020-2022 Javier Llorente javier@opensuse.org
