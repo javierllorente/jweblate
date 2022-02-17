@@ -24,7 +24,7 @@ public class UserAgent {
 
     public final static String NAME = "jWL";
     public final static String VERSION = "0.1";
-    public final static String FULL = NAME + " " + VERSION;
+    public final static String FULL = NAME + "/" + VERSION;
 
     private UserAgent() {
     }
