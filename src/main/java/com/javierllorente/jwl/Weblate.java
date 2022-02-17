@@ -44,31 +44,38 @@ public class Weblate implements TranslationProvider {
         http = new WeblateHttp();
     }
 
+    @Override
     public URI getApiUrl() {
         return http.getApiURI();
     }
 
+    @Override
     public void setApiUrl(URI apiUri) {
         http.setApiURI(apiUri);
     }
     
+    @Override
    public String getAuthToken() {
        return http.getAuthToken();
    }
    
+    @Override
    public void setAuthToken(String authToken) {
        http.setAuthToken(authToken);
    }
 
+    @Override
     public boolean isAuthenticated() {
         return http.isAuthenticated();
     }
     
+    @Override
     public void authenticate()
             throws ClientErrorException, ServerErrorException, ProcessingException {
         http.authenticate();
     }
     
+    @Override
     public void logout() {
         http.setAuthToken("");
         http.setAuthenticated(false);
@@ -96,22 +103,26 @@ public class Weblate implements TranslationProvider {
         return elements;
     }
 
+    @Override
     public List<String> getProjects() 
             throws ClientErrorException, ServerErrorException, ProcessingException {
         return getElements("projects/", "slug");
     }
 
+    @Override
     public List<String> getComponents(String project) 
             throws ClientErrorException, ServerErrorException, ProcessingException {
         return getElements("projects/" + project + "/components/", "slug");
     }
 
+    @Override
     public List<String> getTranslations(String project, String component)
             throws ClientErrorException, ServerErrorException, ProcessingException {
         return getElements("components/" + project + "/" + component + "/translations/", 
                 "language_code");
     }
     
+    @Override
     public String getFileFormat(String project, String component, String language)
             throws ClientErrorException, ServerErrorException, ProcessingException {
         String resource = "translations/" + project + "/" + component
@@ -122,6 +133,7 @@ public class Weblate implements TranslationProvider {
         return componentObject.getString("file_format");
     }
 
+    @Override
     public String getFile(String project, String component, String language)
             throws ClientErrorException, ServerErrorException, ProcessingException {
         String resource = "translations/" + project + "/" + component
@@ -129,6 +141,7 @@ public class Weblate implements TranslationProvider {
         return http.getText(resource);
     }
 
+    @Override
     public Map<String, String> submit(String project, String component, String language, String file)
             throws ClientErrorException, ServerErrorException, ProcessingException {
         String resource = "translations/" + project + "/" + component
