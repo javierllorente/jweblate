@@ -43,6 +43,8 @@ public interface TranslationProvider {
             throws ClientErrorException, ServerErrorException, ProcessingException;
 
     public void logout();
+    
+    public void setUserAgent(String userAgent);
 
     public List<String> getProjects()
             throws ClientErrorException, ServerErrorException, ProcessingException;

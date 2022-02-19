@@ -49,9 +49,11 @@ public class WeblateHttp {
     private WebTarget target;
     private String authToken;
     boolean authenticated;
+    private String userAgent;
 
     public WeblateHttp() {
         authenticated = false;
+        userAgent = UserAgent.FULL;
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.CONNECT_TIMEOUT, 20000);
         config.property(ClientProperties.FOLLOW_REDIRECTS, true);
@@ -105,7 +107,7 @@ public class WeblateHttp {
     public void authenticate() 
             throws ClientErrorException, ServerErrorException, ProcessingException {        
         try (Response response = target.request()
-                .header("User-Agent", UserAgent.FULL)
+                .header("User-Agent", userAgent)
                 .header("Authorization", authToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .get()) {
@@ -122,7 +124,7 @@ public class WeblateHttp {
                 .path(resource)
                 .queryParam("page", page)
                 .request()
-                .header("User-Agent", UserAgent.FULL)
+                .header("User-Agent", userAgent)
                 .header("Authorization", authToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .get();
@@ -138,7 +140,7 @@ public class WeblateHttp {
         Response response = target
                 .path(resource)
                 .request()
-                .header("User-Agent", UserAgent.FULL)
+                .header("User-Agent", userAgent)
                 .header("Authorization", authToken)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .get();
@@ -154,7 +156,7 @@ public class WeblateHttp {
         Response response = target
                 .path(resource)
                 .request()
-                .header("User-Agent", UserAgent.FULL)
+                .header("User-Agent", userAgent)
                 .header("Authorization", authToken)
                 .accept(MediaType.TEXT_PLAIN_TYPE)
                 .get();
@@ -178,7 +180,7 @@ public class WeblateHttp {
         Response response = target
                 .path(resource)
                 .request()
-                .header("User-Agent", UserAgent.FULL)
+                .header("User-Agent", userAgent)
                 .header("Authorization", authToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .post(Entity.entity(multiPartEntity, multiPartEntity.getMediaType()));
@@ -191,6 +193,10 @@ public class WeblateHttp {
     
     private String getConnectionInfo(URI uri, String resource, int status) {
         return "URL: " + uri + resource + ", status: " + status;
+    }
+
+    void setUserAgent(String userAgent) {
+        this.userAgent += " " + userAgent;
     }
     
 }

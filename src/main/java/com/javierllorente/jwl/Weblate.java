@@ -81,6 +81,11 @@ public class Weblate implements TranslationProvider {
         http.setAuthenticated(false);
     }
     
+    @Override
+    public void setUserAgent(String userAgent) {
+        http.setUserAgent(userAgent);
+    }
+    
     private void get(String resource, String path, int page, List<String> elements) 
             throws ClientErrorException, ServerErrorException, ProcessingException {
         JsonObject jsonObject = http.get(resource, page);
