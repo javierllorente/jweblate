@@ -26,7 +26,3 @@ A Java-based Weblate library
 - jakarta.json
 - jersey-media-multipart
 - jersey-media-json-processing
-
-
-
-Copyright (C) 2020-2022 Javier Llorente javier@opensuse.org
