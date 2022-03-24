@@ -6,6 +6,8 @@
     <artifactId>jwl</artifactId>
     <version>0.9.9</version>
     <packaging>jar</packaging>
+    <name>jwl</name>
+    <description>A Java-based Weblate library</description>
     <developers>
         <developer>
             <name>Javier Llorente</name>
