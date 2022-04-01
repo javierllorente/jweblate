@@ -22,9 +22,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:git:https://github.com/javierllorente/jwl</connection>
+        <connection>scm:git:https://github.com/javierllorente/jweblate</connection>
         <tag>HEAD</tag>
-        <url>https://github.com/javierllorente/jwl</url>
+        <url>https://github.com/javierllorente/jweblate</url>
     </scm>
     <build>
         <plugins>
