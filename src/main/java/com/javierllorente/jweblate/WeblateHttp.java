@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.javierllorente.jwl;
+package com.javierllorente.jweblate;
 
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.ClientErrorException;

@@ -1,4 +1,4 @@
-# jwl
+# jweblate
 A Java-based Weblate library
 
 ### Consume Weblate's REST resources easily

@@ -1,4 +1,4 @@
-module com.javierllorente.jwl {
+module com.javierllorente.jweblate {
     requires java.base;
     requires java.logging;
     requires jakarta.ws.rs;
@@ -7,5 +7,5 @@ module com.javierllorente.jwl {
     requires jersey.media.multipart;
     requires jakarta.json;
 
-    exports com.javierllorente.jwl;
+    exports com.javierllorente.jweblate;
 }

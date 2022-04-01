@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.javierllorente.jwl;
+package com.javierllorente.jweblate;
 
 /**
  *
@@ -21,7 +21,7 @@ package com.javierllorente.jwl;
  */
 public class UserAgent {
 
-    public final static String NAME = "jWL";
+    public final static String NAME = "jWeblate";
     public final static String VERSION = "0.1";
     public final static String FULL = NAME + "/" + VERSION 
             + " (" + System.getProperty("os.name") + " " 
