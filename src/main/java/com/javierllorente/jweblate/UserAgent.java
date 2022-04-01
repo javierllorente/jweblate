@@ -21,7 +21,7 @@ package com.javierllorente.jweblate;
  */
 public class UserAgent {
 
-    public final static String NAME = "jWeblate";
+    public final static String NAME = "JWeblate";
     public final static String VERSION = "0.9.9";
     public final static String FULL = NAME + "/" + VERSION 
             + " (" + System.getProperty("os.name") + " " 
